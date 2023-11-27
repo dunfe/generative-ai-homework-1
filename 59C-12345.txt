@@ -1,0 +1,5 @@
+Total Payments: 20000.0
+Available Credits: 567.8400000000001
+Parked Dates:
+2023-06-18 18:30 - Stay Time ...
+2023-06-18 18:30 - 2023-11-27 16:55 $19432.16
