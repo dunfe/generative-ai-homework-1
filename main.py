@@ -1,17 +1,11 @@
 import json
 import re
-from datetime import datetime
+from fee.fee import calculate_fee
+from datetime import datetime, timedelta
 
 # Constants
-PARKING_RATE_PER_HOUR = 5
+FACTOR = [5, 4, 3, 2]
 DATA_FILE = "data.json"
-
-
-class Park:
-    def __init__(self, identity, arrival_time, frequent_parking_number):
-        self.identity = identity
-        self.arrival_time = arrival_time
-        self.frequent_parking_number = frequent_parking_number
 
 
 # Utility Functions
@@ -24,7 +18,14 @@ def validate_car_identity(identity):
         return False
 
 
-# valid number: 73278
+def calculate_sum_of_digits(digits):
+    total = 0
+    for digit in digits:
+        total += int(digit)
+
+    return total
+
+
 def validate_frequent_parking_number(number):
     if len(number) != 5 or not number.isdigit():
         return False
@@ -32,15 +33,9 @@ def validate_frequent_parking_number(number):
     digits = [int(digit) for digit in number]
     check_digit = digits.pop()
 
-    calculated_check_digit = sum(digits) % 11
+    calculated_check_digit = 11 - (sum([digits[i] * FACTOR[i] for i in range(len(digits))]) % 11)
 
     return calculated_check_digit == check_digit
-
-
-def calculate_parking_fee(arrival_time, departure_time):
-    duration = departure_time - arrival_time
-    hours = duration.total_seconds() / 3600
-    return round(hours * PARKING_RATE_PER_HOUR, 2)
 
 
 def read_data_from_file(file_name):
@@ -161,8 +156,9 @@ def pick_up_car():
         arrival_time = datetime.strptime(
             data[car_identity]["arrival_time"], "%Y-%m-%d %H:%M"
         )
+        frequent_parking_number = data[car_identity]["frequent_parking_number"]
         departure_time = datetime.now()
-        fee = calculate_parking_fee(arrival_time, departure_time)
+        fee = calculate_fee(arrival_time, departure_time, frequent_parking_number)
         print(f"Total parking fee: ${fee:.2f}")
         
         while True:
